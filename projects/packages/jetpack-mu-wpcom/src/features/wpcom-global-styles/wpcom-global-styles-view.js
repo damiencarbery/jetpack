@@ -1,7 +1,25 @@
 /* global launchBarUserData */
+import wpcomRequest from 'wpcom-proxy-request';
 import { wpcomTrackEvent } from '../../common/tracks';
-
 import './wpcom-global-styles-view.scss';
+
+const restGlobalStyles = async ( globalStylesId, siteIdOrSlug ) => {
+	if ( ! globalStylesId || ! siteIdOrSlug ) {
+		return false;
+	}
+
+	// TODO find a way to PUT from the frontend preview.
+	return await wpcomRequest( {
+		path: `/sites/${ encodeURIComponent( siteIdOrSlug ) }/global-styles/${ globalStylesId }`,
+		apiNamespace: 'wp/v2',
+		method: 'POST',
+		body: {
+			id: globalStylesId,
+			settings: {},
+			styles: {},
+		},
+	} );
+};
 
 /**
  * Records a Tracks click event.
@@ -75,9 +93,15 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		window.location = previewButton.href;
 	} );
 
-	resetButton?.addEventListener( 'click', event => {
+	resetButton?.addEventListener( 'click', async event => {
 		event.preventDefault();
 		recordEvent( 'wpcom_global_styles_gating_notice_reset_support' );
-		window.open( resetButton.href, '_blank' ).focus();
+		const globalStylesId = resetButton.dataset.globalStylesId;
+		const siteId = resetButton.dataset.blogId;
+		const result = await restGlobalStyles( globalStylesId, siteId );
+		if ( ! result ) {
+			window.open( resetButton.href, '_blank' ).focus();
+		}
+		// TODO SOMETHING console.log( { result, globalStylesId, siteId } );
 	} );
 } );

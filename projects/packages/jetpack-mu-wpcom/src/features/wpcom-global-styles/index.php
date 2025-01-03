@@ -542,8 +542,8 @@ function wpcom_display_global_styles_launch_bar( $bar_controls ) {
 					class="launch-bar-global-styles-reset"
 					href="https://wordpress.com/support/using-styles/#reset-all-styles"
 					target="_blank"
-					data-blog-id="<?php echo esc_attr( $blog_id ); ?>"
-					data-global-styles-id="<?php echo esc_attr( $global_styles_id ); ?>"
+					data-blog-id="<?php echo esc_attr( (string) $blog_id ); ?>"
+					data-global-styles-id="<?php echo esc_attr( (string) $global_styles_id ); ?>"
 				>
 					<?php echo esc_html__( 'Remove premium styles', 'jetpack-mu-wpcom' ); ?>
 					<svg class="icon-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">

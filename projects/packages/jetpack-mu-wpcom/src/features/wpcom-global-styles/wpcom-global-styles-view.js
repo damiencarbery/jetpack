@@ -98,10 +98,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		recordEvent( 'wpcom_global_styles_gating_notice_reset_support' );
 		const globalStylesId = resetButton.dataset.globalStylesId;
 		const siteId = resetButton.dataset.blogId;
-		const result = await restGlobalStyles( globalStylesId, siteId );
-		if ( ! result ) {
+		if ( globalStylesId && siteId ) {
+			resetButton?.classList.add( 'is-resetting' );
+			const result = await restGlobalStyles( globalStylesId, siteId );
+			if ( result ) {
+				window.location.reload();
+			} else {
+				resetButton?.classList.remove( 'is-resetting' );
+			}
+		} else {
 			window.open( resetButton.href, '_blank' ).focus();
 		}
-		// TODO SOMETHING console.log( { result, globalStylesId, siteId } );
 	} );
 } );

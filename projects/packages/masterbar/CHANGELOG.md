@@ -198,7 +198,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notifications: Change Icon [#37676]
 - Updated package dependencies. [#37669] [#37706]
 
-[0.10.7]: https://github.com/Automattic/jetpack-masterbar/compare/v0.10.6...v0.10.7
 [0.10.6]: https://github.com/Automattic/jetpack-masterbar/compare/v0.10.5...v0.10.6
 [0.10.5]: https://github.com/Automattic/jetpack-masterbar/compare/v0.10.4...v0.10.5
 [0.10.4]: https://github.com/Automattic/jetpack-masterbar/compare/v0.10.3...v0.10.4

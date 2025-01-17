@@ -2,6 +2,7 @@ import {
 	InspectorControls,
 	RichText,
 	__experimentalUseGradient as useGradient, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	__experimentalUseBorderProps as useBorderProps, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	withColors,
 	useBlockProps,
 } from '@wordpress/block-editor';
@@ -20,7 +21,6 @@ export function ButtonEdit( props ) {
 		props;
 	const { borderRadius, element, placeholder, text, width, fontSize } = attributes;
 	const isWidthSetOnParentBlock = 'jetpack/parentBlockWidth' in context;
-
 	usePassthroughAttributes( { attributes, clientId, setAttributes } );
 	useWidth( { attributes, disableEffects: isWidthSetOnParentBlock, setAttributes } );
 
@@ -41,7 +41,9 @@ export function ButtonEdit( props ) {
 		className: clsx( 'wp-block-button', className ),
 	} );
 
-	const buttonClasses = clsx( 'wp-block-button__link', {
+	const borderProps = useBorderProps( attributes );
+
+	const buttonClasses = clsx( 'wp-block-button__link', borderProps.className, {
 		'has-background': backgroundColor.color || gradientValue,
 		[ backgroundColor.class ]: ! gradientValue && backgroundColor.class,
 		'has-text-color': textColor.color,
@@ -61,6 +63,7 @@ export function ButtonEdit( props ) {
 		color: textColor.color,
 		borderRadius: borderRadius ? borderRadius + 'px' : undefined,
 		width,
+		...borderProps.style,
 	};
 
 	return (

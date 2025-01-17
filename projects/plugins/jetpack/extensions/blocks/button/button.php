@@ -171,6 +171,10 @@ function get_button_styles( $attributes ) {
 	$has_typography_styles       = array_key_exists( 'style', $attributes ) && array_key_exists( 'typography', $attributes['style'] );
 	$has_custom_font_size        = $has_typography_styles && array_key_exists( 'fontSize', $attributes['style']['typography'] );
 	$has_custom_text_transform   = $has_typography_styles && array_key_exists( 'textTransform', $attributes['style']['typography'] );
+	$has_named_border_color      = array_key_exists( 'borderColor', $attributes );
+	$has_custom_border_color     = array_key_exists( 'style', $attributes ) && array_key_exists( 'border', $attributes['style'] ) && array_key_exists( 'color', $attributes['style']['border'] );
+	$has_border_style            = array_key_exists( 'style', $attributes ) && array_key_exists( 'border', $attributes['style'] ) && array_key_exists( 'style', $attributes['style']['border'] );
+	$has_border_width            = array_key_exists( 'style', $attributes ) && array_key_exists( 'border', $attributes['style'] ) && array_key_exists( 'width', $attributes['style']['border'] );
 
 	if ( $has_font_family ) {
 		$styles[] = sprintf( 'font-family: %s;', $attributes['fontFamily'] );
@@ -209,6 +213,22 @@ function get_button_styles( $attributes ) {
 	if ( $has_width ) {
 		$styles[] = sprintf( 'width: %s;', $attributes['width'] );
 		$styles[] = 'max-width: 100%';
+	}
+
+	if ( $has_named_border_color ) {
+		$styles[] = sprintf( 'border-color: %s;', $attributes['borderColor'] );
+	}
+
+	if ( $has_custom_border_color ) {
+		$styles[] = sprintf( 'border-color: %s;', $attributes['style']['border']['color'] );
+	}
+
+	if ( $has_border_style ) {
+		$styles[] = sprintf( 'border-style: %s;', $attributes['style']['border']['style'] );
+	}
+
+	if ( $has_border_width ) {
+		$styles[] = sprintf( 'border-width: %s;', $attributes['style']['border']['width'] );
 	}
 
 	return implode( ' ', $styles );

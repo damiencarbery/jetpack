@@ -1,8 +1,13 @@
 import jQuery from 'jquery';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 import '../css/jetpack-admin-jitm.scss';
 
 jQuery( document ).ready( function ( $ ) {
+	// Site ID will be automatically added to the request.
+	const JITM_ENDPOINT_URL = `/wpcom/v2/jitm-v2`;
+
 	var templates = {
 		default: function ( envelope ) {
 			const EXTERNAL_LINK_ICON = `
@@ -155,8 +160,8 @@ jQuery( document ).ready( function ( $ ) {
 				$my_template.hide();
 
 				apiFetch( {
-					path: '/jetpack/v4/jitm',
-					method: 'POST', // using DELETE without permalinks is broken in default nginx configuration
+					path: JITM_ENDPOINT_URL,
+					method: 'POST',
 					data: {
 						id: response.id,
 						feature_class: response.feature_class,
@@ -300,14 +305,16 @@ jQuery( document ).ready( function ( $ ) {
 
 			var full_jp_logo_exists = $( '.jetpack-logo__masthead' ).length ? true : false;
 
-			$.get( window.jitm_config.api_root + 'jetpack/v4/jitm', {
-				message_path: message_path,
-				query: query,
-				full_jp_logo_exists: full_jp_logo_exists,
-				_wpnonce: $el.data( 'nonce' ),
+			apiFetch( {
+				path: addQueryArgs( JITM_ENDPOINT_URL, {
+					message_path,
+					query,
+					full_jp_logo_exists,
+				} ),
+				method: 'GET',
 			} ).then( function ( response ) {
-				if ( 'object' === typeof response && response[ '1' ] ) {
-					response = [ response[ '1' ] ];
+				if ( 'object' === typeof response && response[ 'data' ] ) {
+					response = [ response[ 'data' ][ 0 ] ];
 				}
 
 				// properly handle the case of an empty array or no content set

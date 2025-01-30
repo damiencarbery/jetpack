@@ -20,13 +20,9 @@ import './style-tour.scss';
  * @return {JSX.Element|null} The welcome tour component or null.
  */
 function LaunchWpcomWelcomeTour() {
-	const { show, isNewPageLayoutModalOpen, isManuallyOpened } = useSelect(
+	const { show, isManuallyOpened } = useSelect(
 		select => ( {
 			show: select( 'automattic/wpcom-welcome-guide' ).isWelcomeGuideShown(),
-			// Handle the case where the new page pattern modal is initialized and open
-			isNewPageLayoutModalOpen:
-				select( 'automattic/starter-page-layouts' ) &&
-				select( 'automattic/starter-page-layouts' ).isOpen(),
 			isManuallyOpened: select( 'automattic/wpcom-welcome-guide' ).isWelcomeGuideManuallyOpened(),
 		} ),
 		[]
@@ -47,7 +43,7 @@ function LaunchWpcomWelcomeTour() {
 		if ( isBlogOnboardingFlow ) {
 			return;
 		}
-		if ( ! show && ! isNewPageLayoutModalOpen ) {
+		if ( ! show ) {
 			return;
 		}
 
@@ -62,17 +58,9 @@ function LaunchWpcomWelcomeTour() {
 			intent: siteIntent,
 			editor_type: editorType,
 		} );
-	}, [
-		isNewPageLayoutModalOpen,
-		isManuallyOpened,
-		show,
-		siteIntent,
-		siteIntentFetched,
-		editorType,
-		isBlogOnboardingFlow,
-	] );
+	}, [ isManuallyOpened, show, siteIntent, siteIntentFetched, editorType, isBlogOnboardingFlow ] );
 
-	if ( ! show || isNewPageLayoutModalOpen || isBlogOnboardingFlow ) {
+	if ( ! show || isBlogOnboardingFlow ) {
 		return null;
 	}
 

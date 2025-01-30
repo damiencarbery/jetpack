@@ -15,11 +15,8 @@ import './style.scss';
  * @return {JSX.Element} The WpcomNux component or null.
  */
 function WpcomNux() {
-	const { show, isNewPageLayoutModalOpen, isManuallyOpened } = useSelect( select => ( {
+	const { show, isManuallyOpened } = useSelect( select => ( {
 		show: select( 'automattic/wpcom-welcome-guide' ).isWelcomeGuideShown(),
-		isNewPageLayoutModalOpen:
-			select( 'automattic/starter-page-layouts' ) && // Handle the case where SPT is not initalized.
-			select( 'automattic/starter-page-layouts' ).isOpen(),
 		isManuallyOpened: select( 'automattic/wpcom-welcome-guide' ).isWelcomeGuideManuallyOpened(),
 	} ) );
 
@@ -27,15 +24,15 @@ function WpcomNux() {
 
 	// Track opening of the welcome guide
 	useEffect( () => {
-		if ( show && ! isNewPageLayoutModalOpen ) {
+		if ( show ) {
 			wpcomTrackEvent( 'calypso_editor_wpcom_nux_open', {
 				is_gutenboarding: window.calypsoifyGutenberg?.isGutenboarding,
 				is_manually_opened: isManuallyOpened,
 			} );
 		}
-	}, [ isManuallyOpened, isNewPageLayoutModalOpen, show ] );
+	}, [ isManuallyOpened, show ] );
 
-	if ( ! show || isNewPageLayoutModalOpen ) {
+	if ( ! show ) {
 		return null;
 	}
 

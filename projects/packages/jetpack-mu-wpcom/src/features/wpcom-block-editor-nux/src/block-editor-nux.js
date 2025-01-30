@@ -16,7 +16,7 @@ import FirstPostPublishedModal from './first-post-published-modal';
 import PurchaseNotice from './purchase-notice';
 import RecommendedTagsModal from './recommended-tags-modal';
 import SellerCelebrationModal from './seller-celebration-modal';
-import { DEFAULT_VARIANT, BLANK_CANVAS_VARIANT } from './store';
+import { DEFAULT_VARIANT } from './store';
 import VideoPressCelebrationModal from './video-celebration-modal';
 import WpcomNux from './welcome-modal/wpcom-nux';
 import LaunchWpcomWelcomeTour from './welcome-tour/tour-launch';
@@ -30,25 +30,17 @@ function WelcomeTour() {
 		getQueryArg( window.location.href, 'showDraftPostModal' )
 	);
 
-	const { show, isLoaded, variant, isManuallyOpened, isNewPageLayoutModalOpen } = useSelect(
-		select => {
-			const welcomeGuideStoreSelect = select( 'automattic/wpcom-welcome-guide' );
-			const starterPageLayoutsStoreSelect = select( 'automattic/starter-page-layouts' );
+	const { show, isLoaded, variant } = useSelect( select => {
+		const welcomeGuideStoreSelect = select( 'automattic/wpcom-welcome-guide' );
 
-			return {
-				show: welcomeGuideStoreSelect.isWelcomeGuideShown(),
-				isLoaded: welcomeGuideStoreSelect.isWelcomeGuideStatusLoaded(),
-				variant: welcomeGuideStoreSelect.getWelcomeGuideVariant(),
-				isManuallyOpened: welcomeGuideStoreSelect.isWelcomeGuideManuallyOpened(),
-				isNewPageLayoutModalOpen: starterPageLayoutsStoreSelect?.isOpen(), // Handle the case where SPT is not initalized.
-			};
-		},
-		[]
-	);
+		return {
+			show: welcomeGuideStoreSelect.isWelcomeGuideShown(),
+			isLoaded: welcomeGuideStoreSelect.isWelcomeGuideStatusLoaded(),
+			variant: welcomeGuideStoreSelect.getWelcomeGuideVariant(),
+		};
+	}, [] );
 
 	const siteEditorCanvasMode = useCanvasMode();
-
-	const setOpenState = useDispatch( 'automattic/starter-page-layouts' )?.setOpenState;
 
 	const { fetchWelcomeGuideStatus } = useDispatch( 'automattic/wpcom-welcome-guide' );
 
@@ -61,20 +53,12 @@ function WelcomeTour() {
 
 	const filteredShow = applyFilters( 'a8c.WpcomBlockEditorWelcomeTour.show', show );
 
-	if ( ! filteredShow || isNewPageLayoutModalOpen ) {
+	if ( ! filteredShow ) {
 		return null;
 	}
 
 	// Hide the Welcome Tour when not in the edit mode. Note that canvas mode is available only in the site editor
 	if ( siteEditorCanvasMode && siteEditorCanvasMode !== 'edit' ) {
-		return null;
-	}
-
-	// Open patterns panel before Welcome Tour if necessary (e.g. when using Blank Canvas theme)
-	// Do this only when Welcome Tour is not manually opened.
-	// NOTE: at the moment, 'starter-page-templates' assets are not loaded on /site-editor/ page so 'setOpenState' may be undefined
-	if ( variant === BLANK_CANVAS_VARIANT && ! isManuallyOpened && setOpenState ) {
-		setOpenState( 'OPEN_FOR_BLANK_CANVAS' );
 		return null;
 	}
 

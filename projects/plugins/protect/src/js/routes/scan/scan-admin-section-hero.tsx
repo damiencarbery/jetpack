@@ -82,6 +82,9 @@ const ScanAdminSectionHero: React.FC = ( { size = 'normal' }: { size?: 'normal' 
 		}
 	}
 
+	// const [ showFixersModal, setShowFixersModal ] = useState( false );
+	// const [ selectedThreats, setSelectedThreats ] = useState();
+
 	const handleShowAutoFixersClick = threatList => {
 		return event => {
 			event.preventDefault();

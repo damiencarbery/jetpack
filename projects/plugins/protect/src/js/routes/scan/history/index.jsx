@@ -30,7 +30,11 @@ const HistoryPage = () => {
 					<AdminSection>
 						<Container
 							className={ styles[ 'history-container' ] }
+<<<<<<< HEAD
 							horizontalSpacing={ 3 }
+=======
+							horizontalSpacing={ 5 }
+>>>>>>> cf978476d7 (minor adjustments)
 							horizontalGap={ 4 }
 						>
 							<Col>

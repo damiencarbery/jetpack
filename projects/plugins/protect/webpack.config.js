@@ -39,7 +39,7 @@ module.exports = [
 				 * @see https://github.com/Automattic/jetpack/issues/39907
 				 */
 				jetpackWebpackConfig.TranspileRule( {
-					includeNodeModules: [ '@wordpress/dataviews/' ],
+					includeNodeModules: [ '@wordpress/dataviews/wp/' ],
 					babelOpts: {
 						configFile: false,
 						plugins: [

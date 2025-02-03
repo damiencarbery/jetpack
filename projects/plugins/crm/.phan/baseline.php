@@ -102,7 +102,6 @@ return [
     // PhanUnextractableAnnotation : 2 occurrences
     // PhanImpossibleTypeComparisonInLoop : 1 occurrence
     // PhanNoopVariable : 1 occurrence
-    // PhanParamTooMany : 1 occurrence
     // PhanPluginDuplicateArrayKey : 1 occurrence
     // PhanPluginDuplicateCatchStatementBody : 1 occurrence
     // PhanPluginUseReturnValueInternalKnown : 1 occurrence
@@ -162,7 +161,7 @@ return [
         'admin/system/partials/title.block.php' => ['PhanUndeclaredGlobalVariable'],
         'admin/system/system-status.page.php' => ['PhanRedundantCondition', 'PhanTypePossiblyInvalidDimOffset'],
         'admin/tags/tag-manager.page.php' => ['PhanTypeMismatchArgument'],
-        'api/companies.php' => ['PhanParamTooMany', 'PhanPluginSimplifyExpressionBool'],
+        'api/companies.php' => ['PhanPluginSimplifyExpressionBool'],
         'api/create_company.php' => ['PhanImpossibleTypeComparisonInGlobalScope', 'PhanPossiblyUndeclaredGlobalVariable', 'PhanRedundantConditionInGlobalScope'],
         'api/create_customer.php' => ['PhanImpossibleTypeComparisonInGlobalScope', 'PhanPossiblyUndeclaredGlobalVariable', 'PhanRedundantConditionInGlobalScope', 'PhanTypePossiblyInvalidDimOffset'],
         'api/create_event.php' => ['PhanImpossibleTypeComparisonInGlobalScope'],

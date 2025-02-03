@@ -64,6 +64,8 @@ function fixDeps( pkg ) {
 			'@use-gesture/react',
 			'use-memo-one',
 			'uuid',
+			'@wordpress/date',
+			'@wordpress/hooks',
 		] ) {
 			pkg.optionalDependencies[ dep ] = '*';
 		}

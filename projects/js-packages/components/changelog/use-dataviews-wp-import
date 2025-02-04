@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Implement the WP-specific import path for the DataViews component.

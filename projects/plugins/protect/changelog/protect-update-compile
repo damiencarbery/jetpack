@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Update build to support using DataViews from @automattic/jetpack-components.

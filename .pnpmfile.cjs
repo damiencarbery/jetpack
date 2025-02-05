@@ -43,7 +43,7 @@ function fixDeps( pkg ) {
 
 	// Missing deps.
 	// https://github.com/WordPress/gutenberg/issues/67864
-	if ( pkg.name === '@wordpress/dataviews' && pkg.version === '4.12.0' ) {
+	if ( pkg.name === '@wordpress/dataviews' ) {
 		for ( const dep of [
 			'change-case',
 			'colord',

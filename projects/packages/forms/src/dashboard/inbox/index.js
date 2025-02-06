@@ -28,6 +28,7 @@ import SearchForm from '../components/search-form';
 import { STORE_NAME } from '../state';
 import BulkActionsMenu from './bulk-actions-menu';
 import { RESPONSES_FETCH_LIMIT } from './constants';
+import InboxView from './dataviews';
 import ExportModal from './export-modal';
 import InboxList from './list';
 import InboxResponse from './response';
@@ -291,6 +292,9 @@ const Inbox = () => {
 
 	return (
 		<Layout title={ title } className={ classes }>
+			<InboxView />
+
+			<hr />
 			<TabPanel
 				className="jp-forms__inbox-tabs"
 				activeClass="active-tab"
@@ -366,7 +370,6 @@ const Inbox = () => {
 					</>
 				) }
 			</TabPanel>
-
 			<ExportModal isVisible={ showExportModal } onClose={ toggleExportModal } />
 		</Layout>
 	);

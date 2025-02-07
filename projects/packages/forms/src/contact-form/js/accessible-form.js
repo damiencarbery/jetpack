@@ -307,12 +307,15 @@ const isDateFieldValid = input => {
 	const format = input.getAttribute( 'data-format' );
 	const value = input.value;
 
-	if ( value && format && validateDate( value, format ) ) {
-		input.setCustomValidity( '' );
-		return true;
+	if ( value && format ) {
+		if ( validateDate( value, format ) ) {
+			input.setCustomValidity( '' );
+			return true;
+		}
+		input.setCustomValidity( 'Invalid date' );
+		return false;
 	}
-	input.setCustomValidity( L10N.invalidDate );
-	return false;
+	return true;
 };
 
 /**

@@ -14,6 +14,7 @@ import {
 	RESPONSES_REMOVE,
 	RESPONSES_SELECTION_SET,
 	RESPONSES_TAB_TOTALS_ADD,
+	RECEIVE_FILTERS,
 } from './action-types';
 
 const filters = ( state = {}, action ) => {
@@ -21,6 +22,14 @@ const filters = ( state = {}, action ) => {
 		return action.filters;
 	}
 
+	return state;
+};
+
+// TODO: rename when we remove the old filters..
+const filters2 = ( state = {}, action ) => {
+	if ( action.type === RECEIVE_FILTERS ) {
+		return action.filters;
+	}
 	return state;
 };
 
@@ -118,6 +127,7 @@ const currentSelection = ( state = [], action ) => {
 export default combineReducers( {
 	currentSelection,
 	filters,
+	filters2,
 	loading,
 	query,
 	responses,

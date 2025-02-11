@@ -3,24 +3,34 @@
  */
 import { Button } from '@wordpress/components';
 import { useEvent } from '@wordpress/compose';
-import { useEntityRecords, store as coreStore } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useEntityRecords } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { DataViews } from '@wordpress/dataviews';
 import { dateI18n } from '@wordpress/date';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 import { __, _x } from '@wordpress/i18n';
 import { useSearchParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
+import { getPath } from '../../inbox/util';
 import { STORE_NAME } from '../../state';
-import { viewAction, markAsSpamAction, markAsNotSpamAction } from './actions';
+import {
+	viewAction,
+	markAsSpamAction,
+	markAsNotSpamAction,
+	checkForSpamAction,
+	moveToTrashAction,
+	deleteAction,
+} from './actions';
 
+const EMPTY_ARRAY = [];
 // TODO: this might be removed based on the decisions about allowing to view all responses
 // together. Alternatively it can be inlined.
 const getDefaultStatusFilter = ( status = 'inbox' ) => {
 	return {
-		field: 'post_status',
+		field: 'status',
 		operator: 'is',
 		value: [ 'inbox', 'spam', 'trash' ].includes( status ) ? status : 'inbox',
 	};
@@ -35,8 +45,8 @@ const defaultView = {
 	// 	field: 'title',
 	// 	direction: 'asc',
 	// },
-	fields: [ 'date', 'post_status', 'source' ],
-	titleField: 'name',
+	fields: [ 'date', 'status', 'source' ],
+	titleField: 'from',
 };
 const defaultLayouts = {
 	table: { showMedia: false },
@@ -57,12 +67,6 @@ const statuses = [
 		label: _x( 'Trash', 'noun', 'jetpack-forms' ),
 	},
 ];
-// Helper object to map filters to query args.
-const filtersMap = {
-	date: 'month',
-	source: 'parent_id',
-	post_status: 'status',
-};
 /**
  * This hook provides a [ state, setState ] tuple based on the URL parameters
  * and handles the syncing between the URL and the state.
@@ -87,10 +91,9 @@ function useView() {
 	const setViewWithUrlUpdate = useEvent( newView => {
 		setView( newView );
 		// TODO: check if we want to allow an empty `status` and show all responses.
-		// That would require REST API changes that default to fetching `inbox` responses.
-		// Also related to whether we keep the current endpoint..
+		// That would require REST API changes that default to fetching `publish` responses.
 		const newStatusValue =
-			newView.filters.find( filter => filter.field === 'post_status' )?.value || 'inbox';
+			newView.filters.find( filter => filter.field === 'status' )?.value || 'inbox';
 		const statusHasChanged = newStatusValue !== urlStatus;
 		const searchHasChanged = newView.search !== urlSearch;
 		if ( statusHasChanged || searchHasChanged ) {
@@ -117,7 +120,7 @@ function useView() {
 		setView( previousView => {
 			const newStatus = urlStatus ?? 'inbox';
 			const previousViewStatus = previousView.filters.find(
-				filter => filter.field === 'post_status'
+				filter => filter.field === 'status'
 			)?.value;
 			if ( newStatus === previousViewStatus ) {
 				return previousView;
@@ -125,7 +128,7 @@ function useView() {
 			// TODO: I have to check when I reset the filters and if we should be allowed to do that..
 			// For now let's assume we always have a status filter.
 			const newFilters = previousView.filters.reduce( ( accumulator, filter ) => {
-				if ( filter.field === 'post_status' ) {
+				if ( filter.field === 'status' ) {
 					accumulator.push( {
 						...filter,
 						value: newStatus,
@@ -171,101 +174,87 @@ export default function InboxView() {
 	const [ view, setView ] = useView();
 	// const [ searchParams, setSearchParams ] = useSearchParams();
 	// const urlSelection = searchParams.get( 'r' );
-	const [ selection, setSelection ] = useState( [] );
+	const [ selection, setSelection ] = useState( EMPTY_ARRAY );
 	// const [ selection, setSelection ] = useState( postId?.split( ',' ) ?? [] );
 	const onChangeSelection = useCallback( items => {
 		setSelection( items );
 		// TODO: check about having selection in the URL..
 	}, [] );
-	const { fetchResponses, selectResponses } = useDispatch( STORE_NAME );
-	const {
-		currentQuery,
-		monthFilter,
-		sourceFilter,
-		isLoading,
-		data,
-		selectedResponses,
-		tabTotals,
-		totalItems,
-	} = useSelect( select => {
-		const {
-			getQuery,
-			getMonthFilter,
-			isFetchingResponses,
-			getResponses,
-			getSourceFilter,
-			getSelectedResponseIds,
-			getTabTotals,
-			getTotalResponses,
-		} = select( STORE_NAME );
-		return {
-			currentQuery: getQuery(),
-			monthFilter: getMonthFilter(),
-			sourceFilter: getSourceFilter(),
-			isLoading: isFetchingResponses(),
-			data: getResponses(),
-			selectedResponses: getSelectedResponseIds(),
-			tabTotals: getTabTotals(),
-			totalItems: getTotalResponses(),
-		};
-	}, [] );
+	const filters = useSelect( select => select( STORE_NAME ).getFilters(), [] );
 	const queryArgs = useMemo( () => {
-		const filters = view.filters?.reduce( ( accumulator, { field, value } ) => {
-			if ( filtersMap[ field ] ) {
-				accumulator[ filtersMap[ field ] ] = value;
+		// TODO: if we eventually want to show all responses together, we need handle status
+		// when there is no status filter because of the default `status` value in REST API.
+		//_filters.status = [ 'draft', 'publish', 'spam', 'trash' ];
+		const _filters = view.filters?.reduce( ( accumulator, { field, value } ) => {
+			if ( ! value ) {
+				return accumulator;
+			}
+			if ( field === 'status' ) {
+				accumulator.status = value === 'inbox' ? 'draft,publish' : value;
+			}
+			if ( field === 'source' ) {
+				accumulator.parent = value;
+			}
+			if ( field === 'date' ) {
+				const [ year, month ] = value.split( '/' ).map( Number );
+				accumulator.after = new Date( Date.UTC( year, month - 1, 1 ) ).toISOString();
+				accumulator.before = new Date( Date.UTC( year, month, 0 ) ).toISOString();
 			}
 			return accumulator;
 		}, {} );
-		// REST endpoint has no pagination it seems??
 		return {
-			limit: view.perPage,
-			offset: ( view.page - 1 ) * view.perPage,
+			per_page: view.perPage,
+			page: view.page,
 			search: view.search,
-			...filters,
+			..._filters,
 		};
 	}, [ view ] );
-	// const {
-	// 	records,
-	// 	isResolving: isLoadingData,
-	// 	totalItems: totalRecords,
-	// 	totalPages,
-	// } = useEntityRecords( 'postType', 'feedback', {
-	// 	// ...queryArgs,
-	// 	status: 'trash',
-	// 	page: view.page,
-	// 	per_page: view.perPage,
-	// } );
-
-	// This need to go.. (part of store updates).
-	useEffect( () => {
-		fetchResponses( queryArgs );
-	}, [ queryArgs, fetchResponses ] );
+	const {
+		records,
+		isResolving: isLoadingData,
+		totalItems,
+		totalPages,
+	} = useEntityRecords( 'postType', 'feedback', queryArgs );
+	const data = useMemo(
+		() =>
+			records?.map( record => ( {
+				...record,
+				fields: Object.entries( record.fields || {} ).reduce( ( accumulator, [ key, value ] ) => {
+					accumulator[ key ] = decodeEntities( value );
+					return accumulator;
+				}, {} ),
+			} ) ),
+		[ records ]
+	);
 	const paginationInfo = useMemo(
-		() => ( {
-			totalItems,
-			totalPages: Math.ceil( totalItems / view.perPage ),
-		} ),
-		[ totalItems, view.perPage ]
+		() => ( { totalItems, totalPages } ),
+		[ totalItems, totalPages ]
 	);
 	const fields = useMemo(
 		() => [
-			{ id: 'name', label: __( 'From', 'jetpack-forms' ) },
+			{
+				id: 'from',
+				label: __( 'From', 'jetpack-forms' ),
+				getValue: ( { item } ) => {
+					return (
+						decodeEntities( item.author_name ) || item.author_email || item.author_url || item.ip
+					);
+				},
+			},
 			{
 				id: 'date',
 				label: __( 'Date', 'jetpack-forms' ),
 				render: ( { item } ) => dateI18n( 'M j, Y', item.date ),
-				elements: monthFilter.map( _filter => {
+				elements: ( filters?.date || [] ).map( _filter => {
 					const date = new Date();
 					date.setDate( 1 );
 					date.setMonth( _filter.month - 1 );
 					return {
 						label: `${ dateI18n( 'F', date ) } ${ _filter.year }`,
-						value: `${ _filter.year }${ String( _filter.month ).padStart( 2, '0' ) }`,
+						value: `${ _filter.year }/${ _filter.month }`,
 					};
 				} ),
-				filterBy: {
-					operators: [ 'is' ],
-				},
+				filterBy: { operators: [ 'is' ] },
 				enableSorting: false,
 			},
 			{
@@ -274,23 +263,24 @@ export default function InboxView() {
 				render: ( { item } ) => {
 					return (
 						<Button href={ item.entry_permalink } variant="link">
-							{ item.source }
+							{ decodeEntities( item.entry_title ) || getPath( item ) }
 						</Button>
 					);
 				},
-				elements: sourceFilter.map( source => ( { value: source.id, label: source.title } ) ),
-				filterBy: {
-					operators: [ 'is' ],
-				},
+				elements: ( filters?.source || [] ).map( source => ( {
+					value: source.id,
+					label: source.title,
+				} ) ),
+				filterBy: { operators: [ 'is' ] },
 				enableSorting: false,
 			},
 			{ id: 'ip', label: __( 'IP Address', 'jetpack-forms' ), enableSorting: false },
 			{
-				id: 'post_status',
+				id: 'status',
 				label: __( 'Status', 'jetpack-forms' ),
-				render: ( { item: { post_status } } ) => {
+				render: ( { item: { status } } ) => {
 					return statuses.find(
-						status => status.value === post_status || status.recordValue?.includes( post_status )
+						_status => _status.value === status || _status.recordValue?.includes( status )
 					)?.label;
 				},
 				elements: statuses,
@@ -301,18 +291,25 @@ export default function InboxView() {
 				enableSorting: false,
 			},
 		],
-		[ monthFilter, sourceFilter ]
+		[ filters ]
 	);
 	const actions = useMemo( () => {
-		return [ viewAction, markAsSpamAction, markAsNotSpamAction ];
+		return [
+			viewAction,
+			markAsSpamAction,
+			markAsNotSpamAction,
+			checkForSpamAction,
+			moveToTrashAction,
+			deleteAction,
+		];
 	}, [] );
 	return (
 		<DataViews
 			paginationInfo={ paginationInfo }
 			fields={ fields }
 			actions={ actions }
-			data={ data || [] }
-			isLoading={ isLoading }
+			data={ data || EMPTY_ARRAY }
+			isLoading={ isLoadingData }
 			view={ view }
 			onChangeView={ setView }
 			selection={ selection }

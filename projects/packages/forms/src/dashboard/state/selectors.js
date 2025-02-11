@@ -4,6 +4,10 @@
 import { map } from 'lodash';
 import { getPath } from '../inbox/util';
 
+const EMPTY_OBJECT = [];
+
+export const getFilters = state => state.filters2 || EMPTY_OBJECT;
+
 export const isFetchingResponses = state => state.loading;
 
 export const getResponses = state =>

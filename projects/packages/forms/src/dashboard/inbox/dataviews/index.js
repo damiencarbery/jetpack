@@ -5,7 +5,7 @@ import { Button } from '@wordpress/components';
 import { useEvent } from '@wordpress/compose';
 import { useEntityRecords } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { DataViews } from '@wordpress/dataviews';
+import { DataViews } from '@wordpress/dataviews/wp';
 import { dateI18n } from '@wordpress/date';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';

@@ -79,14 +79,14 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 				'date'   => array_map(
 					function ( $row ) {
 						return array(
-							'month' => intval( $row->month ),
-							'year'  => intval( $row->year ),
+							'month' => (int) $row->month,
+							'year'  => (int) $row->year,
 						);
 					},
 					$months
 				),
 				'source' => array_map(
-					function ( $post_id ) {
+					static function ( $post_id ) {
 						return array(
 							'id'    => $post_id,
 							'title' => get_the_title( $post_id ),

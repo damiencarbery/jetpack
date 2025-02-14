@@ -73,7 +73,7 @@ $action-bar-height: 88px;
 	.components-tab-panel__tabs {
 		background-color: #f9f9f9;
 		margin: 0;
-		padding: 16px 64px 0;
+		padding: 16px 48px 0;
 		position: sticky;
 		top: var(--wp-admin--admin-bar--height);
 		z-index: 1;
@@ -660,4 +660,14 @@ $action-bar-height: 88px;
 	}
 }
 
+// TODO: tidy up styles and hardcoded specific pixel values...
+.jp-forms__inbox__dataviews{
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+}
 
+.jp-forms__inbox__dataviews-response {
+	padding: 0 32px 0 0;
+	width: 300px;
+}

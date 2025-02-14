@@ -1,21 +1,26 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
-import { useEvent } from '@wordpress/compose';
+
+import {
+	ExternalLink,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalHStack as HStack,
+} from '@wordpress/components';
 import { useEntityRecords } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { DataViews } from '@wordpress/dataviews/wp';
 import { dateI18n } from '@wordpress/date';
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useCallback, useMemo, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import { __, _x } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useSearchParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
 import { getPath } from '../../inbox/util';
 import { STORE_NAME } from '../../state';
+import InboxResponse from '../response';
 import {
 	viewAction,
 	markAsSpamAction,
@@ -24,147 +29,27 @@ import {
 	moveToTrashAction,
 	deleteAction,
 } from './actions';
+import { useView } from './views';
 
 const EMPTY_ARRAY = [];
-// TODO: this might be removed based on the decisions about allowing to view all responses
-// together. Alternatively it can be inlined.
-const getDefaultStatusFilter = ( status = 'inbox' ) => {
-	return {
-		field: 'status',
-		operator: 'is',
-		value: [ 'inbox', 'spam', 'trash' ].includes( status ) ? status : 'inbox',
-	};
-};
-const defaultView = {
-	type: 'table',
-	search: '',
-	filters: [],
-	page: 1,
-	perPage: 10,
-	// sort: {
-	// 	field: 'title',
-	// 	direction: 'asc',
-	// },
-	fields: [ 'date', 'status', 'source' ],
-	titleField: 'from',
-};
 const defaultLayouts = {
 	table: { showMedia: false },
 	// list: { showMedia: false },
 };
-const statuses = [
-	{
-		value: 'inbox',
-		label: __( 'Inbox', 'jetpack-forms' ),
-		recordValue: [ 'draft', 'publish' ],
-	},
-	{
-		value: 'spam',
-		label: __( 'Spam', 'jetpack-forms' ),
-	},
-	{
-		value: 'trash',
-		label: _x( 'Trash', 'noun', 'jetpack-forms' ),
-	},
-];
+const isItemClickable = () => true;
+
 /**
- * This hook provides a [ state, setState ] tuple based on the URL parameters
- * and handles the syncing between the URL and the state.
- *
- * Currently we do that for the `status` and `search` URL params.
- *
- * @return {Array} The [ state, setState ] tuple.
+ * Hook to get the status filter to apply from the URL.
+ * This is the only way to filter the data by `status` as intentionally
+ * we don't want to have a `status` filter in the UI.
+ * @return {string} The status filter to apply.
  */
-function useView() {
-	const [ searchParams, setSearchParams ] = useSearchParams();
+function useStatusFilter() {
+	const [ searchParams ] = useSearchParams();
 	const urlStatus = searchParams.get( 'status' );
-	const urlSearch = searchParams.get( 'search' );
-	const [ view, setView ] = useState( () => {
-		return {
-			...defaultView,
-			search: urlSearch ?? '',
-			filters: [ getDefaultStatusFilter( urlStatus ) ],
-			...defaultLayouts[ defaultView.type ],
-		};
-	} );
-	// When view changes, update the URL params if needed.
-	const setViewWithUrlUpdate = useEvent( newView => {
-		setView( newView );
-		// TODO: check if we want to allow an empty `status` and show all responses.
-		// That would require REST API changes that default to fetching `publish` responses.
-		const newStatusValue =
-			newView.filters.find( filter => filter.field === 'status' )?.value || 'inbox';
-		const statusHasChanged = newStatusValue !== urlStatus;
-		const searchHasChanged = newView.search !== urlSearch;
-		if ( statusHasChanged || searchHasChanged ) {
-			setSearchParams( previouSearchParams => {
-				// TODO: check if I need a new object here..
-				const _serachParams = new URLSearchParams( previouSearchParams );
-				if ( statusHasChanged ) {
-					_serachParams.set( 'status', newStatusValue );
-				}
-				if ( searchHasChanged ) {
-					if ( newView.search ) {
-						_serachParams.set( 'search', newView.search );
-					} else {
-						_serachParams.delete( 'search' );
-					}
-				}
-				return _serachParams;
-			} );
-		}
-	} );
-	// When status URL param changes, update the view's status filter
-	// without affecting any other config.
-	const onUrlStatusChange = useEvent( () => {
-		setView( previousView => {
-			const newStatus = urlStatus ?? 'inbox';
-			const previousViewStatus = previousView.filters.find(
-				filter => filter.field === 'status'
-			)?.value;
-			if ( newStatus === previousViewStatus ) {
-				return previousView;
-			}
-			// TODO: I have to check when I reset the filters and if we should be allowed to do that..
-			// For now let's assume we always have a status filter.
-			const newFilters = previousView.filters.reduce( ( accumulator, filter ) => {
-				if ( filter.field === 'status' ) {
-					accumulator.push( {
-						...filter,
-						value: newStatus,
-					} );
-				} else {
-					accumulator.push( filter );
-				}
-				return accumulator;
-			}, [] );
-			return {
-				...previousView,
-				filters: newFilters,
-			};
-		} );
-	} );
-	useEffect( () => {
-		onUrlStatusChange();
-	}, [ onUrlStatusChange, urlStatus ] );
-	// When search URL param changes, update the view's search filter
-	// without affecting any other config.
-	const onUrlSearchChange = useEvent( () => {
-		setView( previousView => {
-			const newValue = urlSearch ?? '';
-			if ( newValue === previousView.search ) {
-				return previousView;
-			}
-			return {
-				...previousView,
-				search: newValue,
-			};
-		} );
-	} );
-	useEffect( () => {
-		onUrlSearchChange();
-	}, [ onUrlSearchChange, urlSearch ] );
-	return [ view, setViewWithUrlUpdate ];
+	// Only allow specific status values.
+	const statusFilter = [ 'inbox', 'spam', 'trash' ].includes( urlStatus ) ? urlStatus : 'inbox';
+	return statusFilter === 'inbox' ? 'draft,publish' : statusFilter;
 }
 
 /**
@@ -172,25 +57,20 @@ function useView() {
  */
 export default function InboxView() {
 	const [ view, setView ] = useView();
-	// const [ searchParams, setSearchParams ] = useSearchParams();
-	// const urlSelection = searchParams.get( 'r' );
 	const [ selection, setSelection ] = useState( EMPTY_ARRAY );
+	const [ sidePanelItem, setSidePanelItem ] = useState( null );
 	// const [ selection, setSelection ] = useState( postId?.split( ',' ) ?? [] );
 	const onChangeSelection = useCallback( items => {
 		setSelection( items );
 		// TODO: check about having selection in the URL..
 	}, [] );
+	const statusFilter = useStatusFilter();
+	// TODO: rename below. It's the dates/sources options from REST..
 	const filters = useSelect( select => select( STORE_NAME ).getFilters(), [] );
 	const queryArgs = useMemo( () => {
-		// TODO: if we eventually want to show all responses together, we need handle status
-		// when there is no status filter because of the default `status` value in REST API.
-		//_filters.status = [ 'draft', 'publish', 'spam', 'trash' ];
 		const _filters = view.filters?.reduce( ( accumulator, { field, value } ) => {
 			if ( ! value ) {
 				return accumulator;
-			}
-			if ( field === 'status' ) {
-				accumulator.status = value === 'inbox' ? 'draft,publish' : value;
 			}
 			if ( field === 'source' ) {
 				accumulator.parent = value;
@@ -207,8 +87,9 @@ export default function InboxView() {
 			page: view.page,
 			search: view.search,
 			..._filters,
+			status: statusFilter,
 		};
-	}, [ view ] );
+	}, [ view, statusFilter ] );
 	const {
 		records,
 		isResolving: isLoadingData,
@@ -262,9 +143,9 @@ export default function InboxView() {
 				label: __( 'Source', 'jetpack-forms' ),
 				render: ( { item } ) => {
 					return (
-						<Button href={ item.entry_permalink } variant="link">
+						<ExternalLink href={ item.entry_permalink }>
 							{ decodeEntities( item.entry_title ) || getPath( item ) }
-						</Button>
+						</ExternalLink>
 					);
 				},
 				elements: ( filters?.source || [] ).map( source => ( {
@@ -275,21 +156,6 @@ export default function InboxView() {
 				enableSorting: false,
 			},
 			{ id: 'ip', label: __( 'IP Address', 'jetpack-forms' ), enableSorting: false },
-			{
-				id: 'status',
-				label: __( 'Status', 'jetpack-forms' ),
-				render: ( { item: { status } } ) => {
-					return statuses.find(
-						_status => _status.value === status || _status.recordValue?.includes( status )
-					)?.label;
-				},
-				elements: statuses,
-				filterBy: {
-					operators: [ 'is' ],
-					isPrimary: true,
-				},
-				enableSorting: false,
-			},
 		],
 		[ filters ]
 	);
@@ -304,21 +170,29 @@ export default function InboxView() {
 		];
 	}, [] );
 	return (
-		<DataViews
-			paginationInfo={ paginationInfo }
-			fields={ fields }
-			actions={ actions }
-			data={ data || EMPTY_ARRAY }
-			isLoading={ isLoadingData }
-			view={ view }
-			onChangeView={ setView }
-			selection={ selection }
-			onChangeSelection={ onChangeSelection }
-			// isItemClickable={ item => item.status !== 'trash' }
-			// onClickItem={ ( { id } ) => {
-			// 	TODO: update URL or open modal or open split view??
-			// } }
-			defaultLayouts={ defaultLayouts }
-		/>
+		<HStack spacing={ 8 } alignment="top" justify="flex-start">
+			<div className="jp-forms__inbox__dataviews">
+				<DataViews
+					paginationInfo={ paginationInfo }
+					fields={ fields }
+					actions={ actions }
+					data={ data || EMPTY_ARRAY }
+					isLoading={ isLoadingData }
+					view={ view }
+					onChangeView={ setView }
+					selection={ selection }
+					onChangeSelection={ onChangeSelection }
+					isItemClickable={ isItemClickable }
+					onClickItem={ setSidePanelItem }
+					defaultLayouts={ defaultLayouts }
+				/>
+			</div>
+			{ /* // TODO: use container queries to hide this on mobile and only keep the action */ }
+			{ sidePanelItem && (
+				<div className="jp-forms__inbox__dataviews-response">
+					<InboxResponse response={ sidePanelItem } isLoading={ isLoadingData }></InboxResponse>
+				</div>
+			) }
+		</HStack>
 	);
 }

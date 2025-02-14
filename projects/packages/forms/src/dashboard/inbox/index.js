@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import {
+	TabPanel,
+	Button,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalHStack as HStack,
+} from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -10,18 +15,18 @@ import {
 	useEffect,
 	useState,
 	useRef,
+	useMemo,
 } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { includes, isEqual, keys, map, pick } from 'lodash';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
 import { config } from '../';
 import Layout from '../components/layout';
 import { STORE_NAME } from '../state';
-import { RESPONSES_FETCH_LIMIT } from './constants';
 import InboxView from './dataviews';
 import ExportModal from './export-modal';
 import { useFeedbackQuery } from './use-feedback-query';
@@ -30,13 +35,32 @@ import { useFeedbackQuery } from './use-feedback-query';
  */
 import './style.scss';
 
+const TABS = [
+	{
+		name: 'inbox',
+		title: __( 'Inbox', 'jetpack-forms' ),
+		className: 'jp-forms__inbox-tab-item',
+	},
+	{
+		name: 'spam',
+		title: __( 'Spam', 'jetpack-forms' ),
+		className: 'jp-forms__inbox-tab-item',
+	},
+	{
+		name: 'trash',
+		title: _x( 'Trash', 'noun', 'jetpack-forms' ),
+		className: 'jp-forms__inbox-tab-item',
+	},
+];
+
 const Inbox = () => {
+	const [ searchParams, setSearchParams ] = useSearchParams();
+	const urlStatus = searchParams.get( 'status' );
 	const stickySentinel = useRef( undefined );
 	const [ responseAnimationDirection, setResponseAnimationDirection ] = useState( 1 );
 	const [ showExportModal, setShowExportModal ] = useState( false );
 	const [ isSticky, setSticky ] = useState( false );
 	const navigate = useNavigate();
-	const { fetchResponses, selectResponses } = useDispatch( STORE_NAME );
 	const [
 		currentQuery,
 		monthFilter,
@@ -65,28 +89,15 @@ const Inbox = () => {
 		[]
 	);
 
-	const {
-		currentPage,
-		currentResponseId,
-		setCurrentResponseId: setActiveResponse,
-		query,
-	} = useFeedbackQuery();
+	const { currentResponseId, setCurrentResponseId: setActiveResponse, query } = useFeedbackQuery();
 
+	// If a user has no responses yet, redirect them to the landing page.
 	useEffect( () => {
 		if ( config( 'hasFeedback' ) ) {
 			return;
 		}
-
 		navigate( '/landing' );
 	}, [ navigate ] );
-
-	useEffect( () => {
-		fetchResponses( {
-			limit: RESPONSES_FETCH_LIMIT,
-			offset: ( currentPage - 1 ) * RESPONSES_FETCH_LIMIT,
-			...query,
-		} );
-	}, [ currentPage, fetchResponses, query ] );
 
 	useEffect( () => {
 		if (
@@ -178,14 +189,40 @@ const Inbox = () => {
 		</span>
 	);
 
+	const onTabSelect = useCallback(
+		newStatusValue => {
+			setSearchParams( previouSearchParams => {
+				const _serachParams = new URLSearchParams( previouSearchParams );
+				_serachParams.set( 'status', newStatusValue );
+				return _serachParams;
+			} );
+		},
+		[ setSearchParams ]
+	);
+	// TODO: check `Layout` component to refactor or remove.. For now I copied
+	// the title and subtitle html..
 	return (
-		<Layout title={ title } subtitle={ subtitle } className={ classes }>
-			{ userCanExport && (
-				<Button className="export-button" variant="primary" onClick={ toggleExportModal }>
-					{ __( 'Export', 'jetpack-forms' ) }
-				</Button>
-			) }
-			<InboxView />
+		<Layout className={ classes }>
+			<div className="jp-forms__layout-header">
+				<HStack justify="space-between">
+					<h2 className="jp-forms__layout-title">{ title }</h2>
+					{ userCanExport && (
+						<Button className="export-button" variant="primary" onClick={ toggleExportModal }>
+							{ __( 'Export', 'jetpack-forms' ) }
+						</Button>
+					) }
+				</HStack>
+				<p className="jp-forms__header-subtext">{ subtitle }</p>
+			</div>
+			<TabPanel
+				className="jp-forms__inbox-tabs"
+				activeClass="active-tab"
+				initialTabName={ [ 'inbox', 'spam', 'trash' ].includes( urlStatus ) ? urlStatus : 'inbox' }
+				onSelect={ onTabSelect }
+				tabs={ TABS }
+			>
+				{ () => <InboxView /> }
+			</TabPanel>
 			<ExportModal isVisible={ showExportModal } onClose={ toggleExportModal } />
 		</Layout>
 	);

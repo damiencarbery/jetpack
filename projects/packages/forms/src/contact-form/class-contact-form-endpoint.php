@@ -77,7 +77,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		return rest_ensure_response(
 			array(
 				'date'   => array_map(
-					function ( $row ) {
+					static function ( $row ) {
 						return array(
 							'month' => (int) $row->month,
 							'year'  => (int) $row->year,
@@ -108,27 +108,27 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 	 * @return array Modified Schema array.
 	 */
 	public function add_additional_fields_schema( $schema ) {
-		$schema['properties']['uid'] = array(
+		$schema['properties']['uid']                     = array(
 			'description' => __( 'The UID... Updated description.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['author_name'] = array(
+		$schema['properties']['author_name']             = array(
 			'description' => __( 'The author of the response.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['author_email'] = array(
+		$schema['properties']['author_email']            = array(
 			'description' => __( 'The email of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['author_url'] = array(
+		$schema['properties']['author_url']              = array(
 			'description' => __( 'The URL of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['author_avatar'] = array(
+		$schema['properties']['author_avatar']           = array(
 			'description' => __( 'The avatar of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
@@ -138,27 +138,27 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['ip'] = array(
+		$schema['properties']['ip']                      = array(
 			'description' => __( 'The ip of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['entry_title'] = array(
+		$schema['properties']['entry_title']             = array(
 			'description' => __( 'The title of.....', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['entry_permalink'] = array(
+		$schema['properties']['entry_permalink']         = array(
 			'description' => __( 'The permalink of....', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['subject'] = array(
+		$schema['properties']['subject']                 = array(
 			'description' => __( 'The subject of....', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
 		);
-		$schema['properties']['fields'] = array(
+		$schema['properties']['fields']                  = array(
 			'description' => __( 'The fields of....', 'jetpack-forms' ),
 			'type'        => 'string',
 			'required'    => false,
@@ -252,7 +252,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		$post_ids = $request->get_param( 'post_ids' );
 
 		if ( $action && ! is_array( $post_ids ) ) {
-			return new $this->error_response( __( 'Bad request', 'jetpack-forms' ), 400 );
+			return new WP_REST_Response( array( 'error' => __( 'Bad request', 'jetpack-forms' ) ), 400 );
 		}
 
 		switch ( $action ) {
@@ -262,17 +262,8 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 			case 'mark_as_not_spam':
 				return $this->bulk_action_mark_as_not_spam( $post_ids );
 
-			case 'trash':
-				return $this->bulk_action_trash( $post_ids );
-
-			case 'untrash':
-				return $this->bulk_action_untrash( $post_ids );
-
-			case 'delete':
-				return $this->bulk_action_delete_forever( $post_ids );
-
 			default:
-				return $this->error_response( __( 'Bad request', 'jetpack-forms' ), 400 );
+				return new WP_REST_Response( array( 'error' => __( 'Bad request', 'jetpack-forms' ) ), 400 );
 		}
 	}
 
@@ -298,11 +289,13 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 			);
 
 			if ( ! $status || is_wp_error( $status ) ) {
-				return $this->error_response(
-					sprintf(
-						/* translators: %s: Post ID */
-						__( 'Failed to mark post as spam. Post ID: %d.', 'jetpack-forms' ),
-						$post_id
+				return new WP_REST_Response(
+					array(
+						'error' => sprintf(
+							/* translators: %s: Post ID */
+							__( 'Failed to mark post as spam. Post ID: %d.', 'jetpack-forms' ),
+							$post_id
+						),
 					),
 					500
 				);
@@ -341,11 +334,13 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 			);
 
 			if ( ! $status || is_wp_error( $status ) ) {
-				return $this->error_response(
-					sprintf(
-						/* translators: %s: Post ID */
-						__( 'Failed to mark post as not-spam. Post ID: %d.', 'jetpack-forms' ),
-						$post_id
+				return new WP_REST_Response(
+					array(
+						'error' => sprintf(
+							/* translators: %s: Post ID */
+							__( 'Failed to mark post as not-spam. Post ID: %d.', 'jetpack-forms' ),
+							$post_id
+						),
 					),
 					500
 				);
@@ -360,88 +355,6 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		}
 
 		return new WP_REST_Response( array(), 200 );
-	}
-
-	/**
-	 * Moves all feedback posts matchin the given IDs to trash.
-	 *
-	 * @param  array $post_ids Array of post IDs.
-	 * @return WP_REST_Response
-	 */
-	private function bulk_action_trash( $post_ids ) {
-		foreach ( $post_ids as $post_id ) {
-			if ( ! wp_trash_post( $post_id ) ) {
-				return $this->error_response(
-					sprintf(
-						/* translators: %s: Post ID */
-						__( 'Failed to move post to trash. Post ID: %d.', 'jetpack-forms' ),
-						$post_id
-					),
-					500
-				);
-			}
-		}
-
-		return new WP_REST_Response( array(), 200 );
-	}
-
-	/**
-	 * Removes all feedback posts matchin the given IDs from trash.
-	 *
-	 * @param  array $post_ids Array of post IDs.
-	 * @return WP_REST_Response
-	 */
-	private function bulk_action_untrash( $post_ids ) {
-		// TODO: handle all these actions better..
-		// On error we fail to try to perform the action on all the items.
-		foreach ( $post_ids as $post_id ) {
-			if ( ! wp_untrash_post( $post_id ) ) {
-				return $this->error_response(
-					sprintf(
-						/* translators: %s: Post ID */
-						__( 'Failed to remove post from trash. Post ID: %d.', 'jetpack-forms' ),
-						$post_id
-					),
-					500
-				);
-			}
-		}
-
-		return new WP_REST_Response( array(), 200 );
-	}
-
-	/**
-	 * Deletes all feedback posts matchin the given IDs.
-	 *
-	 * @param  array $post_ids Array of post IDs.
-	 * @return WP_REST_Response
-	 */
-	private function bulk_action_delete_forever( $post_ids ) {
-		foreach ( $post_ids as $post_id ) {
-			if ( ! wp_delete_post( $post_id ) ) {
-				return $this->error_response(
-					sprintf(
-						/* translators: %s: Post ID */
-						__( 'Failed to delete post. Post ID: %d.', 'jetpack-forms' ),
-						$post_id
-					),
-					500
-				);
-			}
-		}
-
-		return new WP_REST_Response( array(), 200 );
-	}
-
-	/**
-	 * Returns a WP_REST_Response containing the given error message and code.
-	 *
-	 * @param  string $message Error message.
-	 * @param  int    $code    Error code.
-	 * @return WP_REST_Response
-	 */
-	private function error_response( $message, $code ) {
-		return new WP_REST_Response( array( 'error' => $message ), $code );
 	}
 
 	/**

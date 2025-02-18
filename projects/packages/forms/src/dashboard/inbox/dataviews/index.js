@@ -14,6 +14,7 @@ import { dateI18n } from '@wordpress/date';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 /**
  * Internal dependencies
@@ -28,6 +29,7 @@ import {
 	checkForSpamAction,
 	moveToTrashAction,
 	deleteAction,
+	restoreAction,
 } from './actions';
 import { useView } from './views';
 
@@ -54,6 +56,8 @@ function useStatusFilter() {
 
 /**
  * The DataViews implementation.
+ *
+ * @return {React.ReactElement} The DataViews component.
  */
 export default function InboxView() {
 	const [ view, setView ] = useView();
@@ -167,6 +171,7 @@ export default function InboxView() {
 			checkForSpamAction,
 			moveToTrashAction,
 			deleteAction,
+			restoreAction,
 		];
 	}, [] );
 	return (

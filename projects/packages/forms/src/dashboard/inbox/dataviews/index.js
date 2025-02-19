@@ -170,12 +170,17 @@ export default function InboxView() {
 			markAsNotSpamAction,
 			checkForSpamAction,
 			moveToTrashAction,
-			deleteAction,
 			restoreAction,
+			deleteAction,
 		];
 	}, [] );
 	return (
-		<HStack spacing={ 8 } alignment="top" justify="flex-start">
+		<HStack
+			spacing={ 8 }
+			alignment="top"
+			justify="flex-start"
+			className="jp-forms__inbox__dataviews__container"
+		>
 			<div className="jp-forms__inbox__dataviews">
 				<DataViews
 					paginationInfo={ paginationInfo }

@@ -8,14 +8,13 @@ import {
 	__experimentalHStack as HStack,
 } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import {
 	createInterpolateElement,
 	useCallback,
 	useEffect,
 	useState,
 	useRef,
-	useMemo,
 } from '@wordpress/element';
 import { __, _x } from '@wordpress/i18n';
 import clsx from 'clsx';

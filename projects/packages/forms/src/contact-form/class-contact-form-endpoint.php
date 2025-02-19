@@ -13,14 +13,10 @@ use WP_REST_Response;
 
 /**
  * Class Contact_Form_Endpoint
- * Used as 'rest_controller_class' parameter when 'feedback' post type is registered in \Automattic\Jetpack\Forms\ContactForm\Contact_Form.
+ * Used as 'rest_controller_class' parameter when 'feedback' post type is
+ * registered in \Automattic\Jetpack\Forms\ContactForm\Contact_Form.
  */
 class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
-	// TODO: add date filter (months) /// `after, before`
-
-	// TODO: add source filter.
-
-	// TODO add bulk actions if needed..
 	// Check Akismet filters there... (contact_form_akismet)
 
 	// TODO: check about `get_responses_permission_check` differences...
@@ -100,70 +96,126 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 	}
 
 	/**
-	 * Adds the schema from additional fields to a schema array.
+	 * Adds the additional fields to the item's schema.
 	 *
-	 * The type of object is inferred from the passed schema.
-	 *
-	 * @param array $schema Schema array.
-	 * @return array Modified Schema array.
+	 * @return array Item schema as an array.
 	 */
-	public function add_additional_fields_schema( $schema ) {
-		$schema['properties']['uid']                     = array(
+	public function get_item_schema() {
+		$schema = parent::get_item_schema();
+
+		$schema['properties']['uid'] = array(
 			'description' => __( 'The UID... Updated description.', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['author_name']             = array(
+
+		$schema['properties']['author_name'] = array(
 			'description' => __( 'The author of the response.', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['author_email']            = array(
+
+		$schema['properties']['author_email'] = array(
 			'description' => __( 'The email of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['author_url']              = array(
+
+		$schema['properties']['author_url'] = array(
 			'description' => __( 'The URL of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['author_avatar']           = array(
+
+		$schema['properties']['author_avatar'] = array(
 			'description' => __( 'The avatar of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
+
 		$schema['properties']['email_marketing_consent'] = array(
 			'description' => __( 'What to add here...?', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['ip']                      = array(
-			'description' => __( 'The ip of the response\'s author.', 'jetpack-forms' ),
+
+		$schema['properties']['ip'] = array(
+			'description' => __( 'The IP of the response\'s author.', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['entry_title']             = array(
+
+		$schema['properties']['entry_title'] = array(
 			'description' => __( 'The title of.....', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['entry_permalink']         = array(
+
+		$schema['properties']['entry_permalink'] = array(
 			'description' => __( 'The permalink of....', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['subject']                 = array(
+
+		$schema['properties']['subject'] = array(
 			'description' => __( 'The subject of....', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		$schema['properties']['fields']                  = array(
+
+		$schema['properties']['fields'] = array(
 			'description' => __( 'The fields of....', 'jetpack-forms' ),
 			'type'        => 'string',
-			'required'    => false,
+			'context'     => array( 'view', 'edit', 'embed' ),
+			'arg_options' => array(
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'readonly'    => true,
 		);
-		return $schema;
+
+		$this->schema = $schema;
+
+		return $this->add_additional_fields_schema( $this->schema );
 	}
 
 	/**

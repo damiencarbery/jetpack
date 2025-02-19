@@ -1,8 +1,9 @@
 import { AntiSpamIcon } from '@automattic/jetpack-components';
 import { store as coreStore } from '@wordpress/core-data';
 import { __, sprintf } from '@wordpress/i18n';
-import { seen, thumbsDown, thumbsUp, trash, backup } from '@wordpress/icons';
+import { seen, trash, backup } from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
+import { notSpam, spam } from '../../../icons';
 import { STORE_NAME } from '../../../state';
 import { ACTIONS } from '../../constants';
 import InboxResponse from '../../response';
@@ -23,7 +24,7 @@ export const markAsSpamAction = {
 	label: __( 'Mark as spam', 'jetpack-forms' ),
 	isEligible: item => item.status !== 'spam',
 	supportsBulk: true,
-	icon: thumbsDown,
+	icon: spam,
 	async callback( items, { registry } ) {
 		const itemIds = items.map( ( { id } ) => id );
 		const { createSuccessNotice, createErrorNotice } = registry.dispatch( noticesStore );
@@ -57,7 +58,7 @@ export const markAsNotSpamAction = {
 	label: __( 'Not spam', 'jetpack-forms' ),
 	isEligible: item => item.status === 'spam',
 	supportsBulk: true,
-	icon: thumbsUp,
+	icon: notSpam,
 	async callback( items, { registry } ) {
 		const itemIds = items.map( ( { id } ) => id );
 		const { createSuccessNotice, createErrorNotice } = registry.dispatch( noticesStore );
@@ -86,6 +87,9 @@ export const markAsNotSpamAction = {
 	},
 };
 
+// TODO: should there be a check whether Akismet is enabled?
+// TODO: also current implementation seems to check for every response and not the selected ones..
+// TODO: shouldn't we use the Akismet REST API? Can we?
 export const checkForSpamAction = {
 	id: 'check-for-spam',
 	label: __( 'Check for spam', 'jetpack-forms' ),
@@ -98,6 +102,35 @@ export const checkForSpamAction = {
 		return <p>This does not work right now..</p>;
 	},
 };
+
+// /**
+//  * Custom temporary handler for check-for-spam action based on grunion_check_for_spam.
+//  *
+//  * @param {number} offset - Offset for the query.
+//  * @return {Promise} Promise that resolves once checking for spam has finished.
+//  */
+// const checkForSpam = ( offset = 0 ) => {
+// 	const limit = 100;
+// 	const body = new FormData();
+
+// 	body.append( 'action', 'grunion_recheck_queue' );
+// 	body.append(
+// 		`jetpack_check_feedback_spam_${ config( 'blogId' ) }`,
+// 		config( 'checkForSpamNonce' )
+// 	);
+// 	body.append( 'offset', offset );
+// 	body.append( 'limit', limit );
+
+// 	return fetch( window.ajaxurl, { method: 'POST', body } )
+// 		.then( response => response.json() )
+// 		.then( data => {
+// 			if ( data.processed < limit ) {
+// 				return;
+// 			}
+
+// 			return checkForSpam( offset + limit );
+// 		} );
+// };
 
 export const restoreAction = {
 	id: 'restore',

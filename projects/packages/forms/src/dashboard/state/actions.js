@@ -3,16 +3,11 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { fetchResponses as fetchResponsesFromApi } from '../data/responses';
 import {
 	ASYNC_ROUTINE_DISPATCH,
-	RESPONSES_FETCH,
-	RESPONSES_FETCH_FAIL,
-	RESPONSES_FETCH_RECEIVE,
 	RESPONSES_LOADING_SET,
 	RESPONSES_REMOVE,
 	RESPONSES_SELECTION_SET,
-	RESPONSES_TAB_TOTALS_ADD,
 	RECEIVE_FILTERS,
 } from './action-types';
 
@@ -28,37 +23,6 @@ export const dispatchAsync = ( apply, args = [] ) => ( {
 	apply,
 	args,
 } );
-
-/**
- * Handles the entire flow for fetching responses asynchronously.
- *
- * @param {object}  query          - Query.
- * @param {object}  options        - Options.
- * @param {boolean} options.append - Whether to append the responses to the existing set or replace it. Defaults to false.
- * @yield {object} Action object.
- * @return {object} Action object.
- */
-export function* fetchResponses( query, options = {} ) {
-	yield { type: RESPONSES_FETCH, append: options.append, query };
-
-	try {
-		const data = yield dispatchAsync( fetchResponsesFromApi, [ query ] );
-
-		return {
-			type: RESPONSES_FETCH_RECEIVE,
-			responses: data.responses,
-			total: data.totals[ query.status || 'inbox' ],
-			tabTotals: data.totals,
-			filters: data.filters_available,
-			append: options.append,
-		};
-	} catch ( error ) {
-		return {
-			type: RESPONSES_FETCH_FAIL,
-			error,
-		};
-	}
-}
 
 /**
  * Removes the given responses from the current set.
@@ -93,17 +57,6 @@ export const selectResponses = selectedResponses => ( {
 export const setLoading = loading => ( {
 	type: RESPONSES_LOADING_SET,
 	loading,
-} );
-
-/**
- * Add to current tab total numbers.
- *
- * @param {object} tabTotals - Totals to add.
- * @return {object} Action object,
- */
-export const addTabTotals = tabTotals => ( {
-	type: RESPONSES_TAB_TOTALS_ADD,
-	tabTotals,
 } );
 
 /**

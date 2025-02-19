@@ -29,7 +29,7 @@ $action-bar-height: 88px;
 }
 
 .jp-forms__inbox-tabs {
-	.jp-forms__inbox.is-response-view & .components-tab-panel__tabs {
+	.jp-forms__inbox & .components-tab-panel__tabs {
 		display: flex;
 	}
 
@@ -111,11 +111,11 @@ $action-bar-height: 88px;
 		display: none;
 	}
 
-	.jp-forms__inbox.is-response-view &:first-child {
+	.jp-forms__inbox &:first-child {
 		display: none;
 	}
 
-	.jp-forms__inbox.is-response-view &:last-child {
+	.jp-forms__inbox &:last-child {
 		display: flex;
 	}
 

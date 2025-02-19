@@ -120,32 +120,6 @@ body.toplevel_page_jetpack-forms.toplevel_page_jetpack-forms {
 		}
 	}
 
-	.jp-forms__inbox-actions {
-		--jp-forms-border-color: var( --color-neutral-5, #dcdcde );
-
-		background-color: #fdfdfd;
-		border-top: 1px solid #0000000d;
-		padding-left: 32px;
-		padding-right: 32px;
-		padding-top: 31px;
-		top: calc(var(--wp-admin--admin-bar--height) + #{$tabs-height});
-
-		.components-button {
-			font-size: 14px;
-			padding: var(--jp-forms-spacing-base ) calc( var( --jp-forms-spacing-base ) * 2 );
-
-			&:hover {
-				background-color: var( --color-neutral-0, #f6f7f7 );
-				box-shadow: inset 0 0 0 1px var( --jp-forms-border-color );
-				color: var( --color-neutral-100, #101517 );
-			}
-
-			svg {
-				fill: var( --color-neutral-30, #8c8f94 );
-			}
-		}
-	}
-
 	.jp-forms__inbox-sticky-mark {
 		top: calc(var(--wp-admin--admin-bar--height) + #{$tabs-height} + #{$action-bar-height});
 	}

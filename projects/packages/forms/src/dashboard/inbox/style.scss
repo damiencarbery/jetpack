@@ -5,19 +5,6 @@ $tabs-height: $tab-item-height + 16px;
 $action-bar-height: 88px;
 
 .jp-forms__inbox {
-	a.back-button {
-		align-items: center;
-		color: #2C3338;
-		cursor: pointer;
-		display: none;
-		font-size: 14px;
-		font-weight: 500;
-
-		svg {
-			margin-right: 4px;
-		}
-	}
-
 	// visual aid for focus, currently only export button
 	.button-primary.export-button:focus {
 		box-shadow: var( --jp-forms-focus-shadow );
@@ -29,45 +16,21 @@ $action-bar-height: 88px;
 		}
 	}
 
+	span.title {
+		display: inline-flex !important;
+	}
+
 	span.subtitle {
 		padding-left: 0;
 		white-space: pre;
-	}
-
-	@media (min-width: 1025px) {
-		a.back-button {
-			display: none !important;
-		}
-
-		span.title {
-			display: inline-flex !important;
-		}
-
-		span.subtitle {
-			display: inline-flex !important;
-			flex-wrap: wrap;
-		}
-	}
-
-	&.is-response-view {
-		span.title,
-		span.subtitle {
-			display: none;
-		}
-
-		a.back-button {
-			display: inline-flex;
-		}
+		display: inline-flex !important;
+		flex-wrap: wrap;
 	}
 }
 
 .jp-forms__inbox-tabs {
 	.jp-forms__inbox.is-response-view & .components-tab-panel__tabs {
-		display: none;
-
-		@media (min-width: 1025px) {
-			display: flex;
-		}
+		display: flex;
 	}
 
 	.components-tab-panel__tabs {
@@ -408,71 +371,6 @@ $action-bar-height: 88px;
 
 .jp-forms__inbox-response-data-value {
 	white-space: pre-wrap;
-}
-
-// ACTIONS ROW
-.jp-forms__inbox-actions {
-	background: white;
-	display: flex;
-	flex-direction: row;
-	gap: var( --jp-forms-spacing-base );
-	padding: 32px 64px 16px;
-	position: sticky;
-	top: calc(var(--wp-admin--admin-bar--height) + #{$tabs-height});
-	z-index: 1;
-
-	@media (max-width: 600px) {
-		top: $tabs-height;
-	}
-
-	@media (max-width: 660px) {
-		padding: calc( var(--jp-forms-spacing-base ) * 2 ) 24px;
-	}
-
-	.jp-forms__inbox.is-response-view & {
-		display: none;
-
-		@media (min-width: 1025px) {
-			display: flex;
-		}
-	}
-
-	.components-dropdown {
-		@media (max-width: 782px) {
-			display: none;
-		}
-	}
-
-	.components-button {
-		border-radius: var( --jp-forms-border-radius );
-		height: var( --jp-forms-input-wrapper-height );
-		letter-spacing: -0.02em;
-		font-size: var(--jp-forms-font-size-regular);
-		font-weight: 400;
-		padding: var( --jp-forms-spacing-base ) calc( var( --jp-forms-spacing-base ) * 1.5 );
-
-		&.is-secondary {
-			background: var( --jp-forms-white );
-			color: var( --jp-forms-black );
-			box-shadow: inset 0 0 0 1px var( --jp-forms-border-color );
-
-			&.is-opened,
-			&:hover:not(:disabled) {
-				background: var(--jp-forms-color-darker-10 );
-				color: var( --jp-forms-white );
-			}
-		}
-	}
-
-	.button-primary.export-button {
-		background-color: var( --wp-admin-theme-color, #000 );
-		border-color: var( --wp-admin-theme-color, #000 );
-		margin-left: auto;
-
-		@media (max-width: 782px) {
-			display: none;
-		}
-	}
 }
 
 // TODO: tidy up styles and hardcoded specific pixel values...

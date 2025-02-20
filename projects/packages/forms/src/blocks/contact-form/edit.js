@@ -48,6 +48,7 @@ const validFields = filter( childBlocks, ( { settings } ) => {
 
 const ALLOWED_BLOCKS = [
 	...map( validFields, block => `jetpack/${ block.name }` ),
+	'jetpack/field-text',
 	'core/audio',
 	'core/columns',
 	'core/group',

@@ -7,9 +7,15 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalHStack as HStack,
 } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
+import { useEntityRecords, store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createInterpolateElement, useCallback, useEffect, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useEffect,
+	useState,
+	useMemo,
+} from '@wordpress/element';
 import { __, _x } from '@wordpress/i18n';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 /**
@@ -17,6 +23,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
  */
 import { config } from '../';
 import Layout from '../components/layout';
+import { STORE_NAME } from '../state';
 import InboxView from './dataviews';
 import ExportModal from './export-modal';
 /**
@@ -24,30 +31,69 @@ import ExportModal from './export-modal';
  */
 import './style.scss';
 
-const TABS = [
-	{
-		name: 'inbox',
-		title: __( 'Inbox', 'jetpack-forms' ),
-		className: 'jp-forms__inbox-tab-item',
-	},
-	{
-		name: 'spam',
-		title: __( 'Spam', 'jetpack-forms' ),
-		className: 'jp-forms__inbox-tab-item',
-	},
-	{
-		name: 'trash',
-		title: _x( 'Trash', 'noun', 'jetpack-forms' ),
-		className: 'jp-forms__inbox-tab-item',
-	},
-];
+const getTabTitle = ( title, totalItems ) => {
+	return (
+		<>
+			{ title }
+			<span className="jp-forms__inbox-tab-item-count">{ totalItems || 0 }</span>
+		</>
+	);
+};
+/**
+ * Helper hook that returns the tab titles with the total items appended,
+ * based on the current query.
+ *
+ * @return {object[]} The tab items.
+ */
+function useTabItems() {
+	const currentQuery = useSelect( select => select( STORE_NAME ).getCurrentQuery(), [] );
+	const queryBase = { ...currentQuery, per_page: 1, _fields: 'id' };
+	const { isResolving: isLoadingInbox, totalItems: totalItemsInbox } = useEntityRecords(
+		'postType',
+		'feedback',
+		{ ...queryBase, status: 'publish,draft' }
+	);
+	const { isResolving: isLoadingSpam, totalItems: totalItemsSpam } = useEntityRecords(
+		'postType',
+		'feedback',
+		{ ...queryBase, status: 'spam' }
+	);
+	const { isResolving: isLoadingTrash, totalItems: totalItemsTrash } = useEntityRecords(
+		'postType',
+		'feedback',
+		{ ...queryBase, status: 'trash' }
+	);
+	const isLoading = isLoadingInbox || isLoadingSpam || isLoadingTrash;
+	return useMemo( () => {
+		return [
+			{
+				name: 'inbox',
+				title: getTabTitle( __( 'Inbox', 'jetpack-forms' ), totalItemsInbox ),
+				className: 'jp-forms__inbox-tab-item',
+				disabled: isLoading,
+			},
+			{
+				name: 'spam',
+				title: getTabTitle( __( 'Spam', 'jetpack-forms' ), totalItemsSpam ),
+				className: 'jp-forms__inbox-tab-item',
+				disabled: isLoading,
+			},
+			{
+				name: 'trash',
+				title: getTabTitle( _x( 'Trash', 'noun', 'jetpack-forms' ), totalItemsTrash ),
+				className: 'jp-forms__inbox-tab-item',
+				disabled: isLoading,
+			},
+		];
+	}, [ isLoading, totalItemsInbox, totalItemsSpam, totalItemsTrash ] );
+}
 
 const Inbox = () => {
 	const [ searchParams, setSearchParams ] = useSearchParams();
 	const urlStatus = searchParams.get( 'status' );
 	const [ showExportModal, setShowExportModal ] = useState( false );
 	const navigate = useNavigate();
-
+	const tabs = useTabItems();
 	const userCanExport = useSelect(
 		select => select( coreStore ).canUser( 'update', 'settings' ),
 		[]
@@ -115,7 +161,7 @@ const Inbox = () => {
 				activeClass="active-tab"
 				initialTabName={ [ 'inbox', 'spam', 'trash' ].includes( urlStatus ) ? urlStatus : 'inbox' }
 				onSelect={ onTabSelect }
-				tabs={ TABS }
+				tabs={ tabs }
 			>
 				{ () => <InboxView /> }
 			</TabPanel>

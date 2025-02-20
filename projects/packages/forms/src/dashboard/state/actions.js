@@ -6,9 +6,9 @@ import { store as coreStore } from '@wordpress/core-data';
 import {
 	ASYNC_ROUTINE_DISPATCH,
 	RESPONSES_LOADING_SET,
-	RESPONSES_REMOVE,
 	RESPONSES_SELECTION_SET,
 	RECEIVE_FILTERS,
+	SET_CURRENT_QUERY,
 } from './action-types';
 
 /**
@@ -22,19 +22,6 @@ export const dispatchAsync = ( apply, args = [] ) => ( {
 	type: ASYNC_ROUTINE_DISPATCH,
 	apply,
 	args,
-} );
-
-/**
- * Removes the given responses from the current set.
- *
- * @param {Array}  responseIds - Response IDs to remove.
- * @param {string} status      - Current of the responses to be removed.
- * @return {object} Action object.
- */
-export const removeResponses = ( responseIds, status ) => ( {
-	type: RESPONSES_REMOVE,
-	responseIds,
-	status,
 } );
 
 /**
@@ -69,6 +56,19 @@ export function receiveFilters( filters ) {
 	return {
 		type: RECEIVE_FILTERS,
 		filters,
+	};
+}
+
+/**
+ * Set the current DataViews query.
+ *
+ * @param {object} currentQuery - The current DataViews query.
+ * @return {object} Action object.
+ */
+export function setCurrentQuery( currentQuery ) {
+	return {
+		type: SET_CURRENT_QUERY,
+		currentQuery,
 	};
 }
 

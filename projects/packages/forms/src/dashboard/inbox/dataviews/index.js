@@ -7,7 +7,7 @@ import {
 	__experimentalHStack as HStack,
 } from '@wordpress/components';
 import { useEntityRecords } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { DataViews } from '@wordpress/dataviews/wp';
 import { dateI18n } from '@wordpress/date';
 import { useCallback, useMemo, useState } from '@wordpress/element';
@@ -40,11 +40,11 @@ const getItemId = item => item.id.toString();
  * Hook to get the status filter to apply from the URL.
  * This is the only way to filter the data by `status` as intentionally
  * we don't want to have a `status` filter in the UI.
+ *
+ * @param {string} urlStatus - The current status from the URL.
  * @return {string} The status filter to apply.
  */
-function useStatusFilter() {
-	const [ searchParams ] = useSearchParams();
-	const urlStatus = searchParams.get( 'status' );
+function useStatusFilter( urlStatus ) {
 	// Only allow specific status values.
 	const statusFilter = [ 'inbox', 'spam', 'trash' ].includes( urlStatus ) ? urlStatus : 'inbox';
 	return statusFilter === 'inbox' ? 'draft,publish' : statusFilter;
@@ -57,7 +57,11 @@ function useStatusFilter() {
  */
 export default function InboxView() {
 	const [ view, setView ] = useView();
-	const statusFilter = useStatusFilter();
+	const [ searchParams, setSearchParams ] = useSearchParams();
+	const { setCurrentQuery } = useDispatch( STORE_NAME );
+	const selectedResponses = searchParams.get( 'r' );
+	const urlStatus = searchParams.get( 'status' );
+	const statusFilter = useStatusFilter( urlStatus );
 	const filterOptions = useSelect( select => select( STORE_NAME ).getFilters(), [] );
 	const queryArgs = useMemo( () => {
 		const _filters = view.filters?.reduce( ( accumulator, { field, value } ) => {
@@ -74,14 +78,18 @@ export default function InboxView() {
 			}
 			return accumulator;
 		}, {} );
-		return {
+		const _queryArgs = {
 			per_page: view.perPage,
 			page: view.page,
 			search: view.search,
 			..._filters,
 			status: statusFilter,
 		};
-	}, [ view, statusFilter ] );
+		// We need to keep the current query args in state to be used in `export`
+		// and getting the total records per `status`.
+		setCurrentQuery( _queryArgs );
+		return _queryArgs;
+	}, [ view, statusFilter, setCurrentQuery ] );
 	const {
 		records,
 		isResolving: isLoadingData,
@@ -99,8 +107,6 @@ export default function InboxView() {
 			} ) ),
 		[ records ]
 	);
-	const [ searchParams, setSearchParams ] = useSearchParams();
-	const selectedResponses = searchParams.get( 'r' );
 	const [ selection, setSelection ] = useState( selectedResponses?.split( ',' ) || EMPTY_ARRAY );
 	const [ sidePanelItem, setSidePanelItem ] = useState();
 	const onChangeSelection = useCallback(

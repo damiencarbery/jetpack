@@ -99,7 +99,7 @@ class Password_Manager {
 	public function on_profile_update( int $user_id, \WP_User $old_user_data ): void {
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( isset( $_POST['action'] ) && $_POST['action'] === 'update' ) {
-			$this->save_recent_password( $user_id, $old_user_data->user_pass );
+			$this->save_recent_password_hash( $user_id, $old_user_data->user_pass );
 		}
 	}
 
@@ -111,7 +111,7 @@ class Password_Manager {
 	 * @return void
 	 */
 	public function on_password_reset( \WP_User $user ): void {
-		$this->save_recent_password( $user->ID, $user->user_pass );
+		$this->save_recent_password_hash( $user->ID, $user->user_pass );
 	}
 
 	/**
@@ -122,7 +122,7 @@ class Password_Manager {
 	 *
 	 * @return void
 	 */
-	public function save_recent_password( int $user_id, string $password_hash ): void {
+	public function save_recent_password_hash( int $user_id, string $password_hash ): void {
 		$recent_passwords = get_user_meta( $user_id, Config::PASSWORD_MANAGER_RECENT_PASSWORD_HASHES_USER_META_KEY, true );
 
 		if ( ! is_array( $recent_passwords ) ) {

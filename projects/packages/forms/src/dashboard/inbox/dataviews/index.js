@@ -13,7 +13,7 @@ import { dateI18n } from '@wordpress/date';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 /**
  * Internal dependencies
@@ -58,7 +58,7 @@ function useStatusFilter( urlStatus ) {
 export default function InboxView() {
 	const [ view, setView ] = useView();
 	const [ searchParams, setSearchParams ] = useSearchParams();
-	const { setCurrentQuery } = useDispatch( STORE_NAME );
+	const { setCurrentQuery, setSelectedResponses } = useDispatch( STORE_NAME );
 	const selectedResponses = searchParams.get( 'r' );
 	const urlStatus = searchParams.get( 'status' );
 	const statusFilter = useStatusFilter( urlStatus );
@@ -108,6 +108,16 @@ export default function InboxView() {
 		[ records ]
 	);
 	const [ selection, setSelection ] = useState( selectedResponses?.split( ',' ) || EMPTY_ARRAY );
+
+	// We need to keep the valid selection item in state to be used in `export`.
+	// We do this because a user can have in their selection either ids that
+	// do not exist at all or ids that are not in the current data set.
+	useEffect( () => {
+		const validSelectedIds = ( selection || [] ).filter( id =>
+			data?.some( record => getItemId( record ) === id )
+		);
+		setSelectedResponses( validSelectedIds );
+	}, [ data, selection, setSelectedResponses ] );
 	const [ sidePanelItem, setSidePanelItem ] = useState();
 	const onChangeSelection = useCallback(
 		items => {

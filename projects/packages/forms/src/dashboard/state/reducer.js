@@ -5,12 +5,7 @@ import { combineReducers } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import {
-	RESPONSES_FETCH_RECEIVE,
-	RESPONSES_SELECTION_SET,
-	RECEIVE_FILTERS,
-	SET_CURRENT_QUERY,
-} from './action-types';
+import { SET_SELECTED_RESPONSES, RECEIVE_FILTERS, SET_CURRENT_QUERY } from './action-types';
 
 const filters = ( state = {}, action ) => {
 	if ( action.type === RECEIVE_FILTERS ) {
@@ -26,20 +21,15 @@ const currentQuery = ( state = {}, action ) => {
 	return state;
 };
 
-const currentSelection = ( state = [], action ) => {
-	if ( action.type === RESPONSES_FETCH_RECEIVE ) {
-		return [];
-	}
-
-	if ( action.type === RESPONSES_SELECTION_SET ) {
+const selectedResponsesFromCurrentDataset = ( state = [], action ) => {
+	if ( action.type === SET_SELECTED_RESPONSES ) {
 		return action.selectedResponses;
 	}
-
 	return state;
 };
 
 export default combineReducers( {
-	currentSelection,
+	selectedResponsesFromCurrentDataset,
 	filters,
 	currentQuery,
 } );

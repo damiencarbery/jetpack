@@ -3,48 +3,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import {
-	ASYNC_ROUTINE_DISPATCH,
-	RESPONSES_LOADING_SET,
-	RESPONSES_SELECTION_SET,
-	RECEIVE_FILTERS,
-	SET_CURRENT_QUERY,
-} from './action-types';
-
-/**
- * One dispatch async to rule them all.
- *
- * @param {Function} apply - The function to apply the dispatch to.
- * @param {Array}    args  - Arguments to be passed onto the function.
- * @return {object} Action object.
- */
-export const dispatchAsync = ( apply, args = [] ) => ( {
-	type: ASYNC_ROUTINE_DISPATCH,
-	apply,
-	args,
-} );
-
-/**
- * Updates the currently selected responses.
- *
- * @param {Array} selectedResponses - Selected responses.
- * @return {object}                   Action object.
- */
-export const selectResponses = selectedResponses => ( {
-	type: RESPONSES_SELECTION_SET,
-	selectedResponses,
-} );
-
-/**
- * Set the application loading state.
- *
- * @param {boolean} loading - The loading state.
- * @return {object} Action object.
- */
-export const setLoading = loading => ( {
-	type: RESPONSES_LOADING_SET,
-	loading,
-} );
+import { SET_SELECTED_RESPONSES, RECEIVE_FILTERS, SET_CURRENT_QUERY } from './action-types';
 
 /**
  * Receive the available filters for the responses.
@@ -58,6 +17,17 @@ export function receiveFilters( filters ) {
 		filters,
 	};
 }
+
+/**
+ * Set the selected responses from current data set.
+ *
+ * @param {Array} selectedResponses - Selected responses.
+ * @return {object}                   Action object.
+ */
+export const setSelectedResponses = selectedResponses => ( {
+	type: SET_SELECTED_RESPONSES,
+	selectedResponses,
+} );
 
 /**
  * Set the current DataViews query.

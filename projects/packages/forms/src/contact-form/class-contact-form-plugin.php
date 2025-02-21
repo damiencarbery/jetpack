@@ -1762,12 +1762,16 @@ class Contact_Form_Plugin {
 			$args['s'] = sanitize_text_field( wp_unslash( $_POST['search'] ) );
 		}
 
-		if ( ! empty( $_POST['year'] ) && intval( $_POST['year'] ) > 0 ) {
-			$args['date_query']['year'] = intval( $_POST['year'] );
-		}
-
-		if ( ! empty( $_POST['month'] ) && intval( $_POST['month'] ) > 0 ) {
-			$args['date_query']['month'] = intval( $_POST['month'] );
+		// TODO: This function seems to be reused by the `admin` UI.
+		// Since we want to remove that UI, it's probably fine to update here..
+		// We need to carefully check though..
+		if ( ! empty( $_POST['after'] ) && ! empty( $_POST['before'] ) ) {
+			$before = strtotime( sanitize_text_field( wp_unslash( $_POST['before'] ) ) );
+			$after  = strtotime( sanitize_text_field( wp_unslash( $_POST['after'] ) ) );
+			if ( $before && $after && $before < $after ) {
+				$args['date_query']['after']  = $after;
+				$args['date_query']['before'] = $before;
+			}
 		}
 
 		if ( ! empty( $_POST['selected'] ) && is_array( $_POST['selected'] ) ) {

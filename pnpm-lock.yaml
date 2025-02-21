@@ -2403,9 +2403,6 @@ importers:
       '@wordpress/data':
         specifier: 10.17.0
         version: 10.17.0(react@18.3.1)
-      '@wordpress/dom-ready':
-        specifier: 4.17.0
-        version: 4.17.0
       '@wordpress/element':
         specifier: 6.17.0
         version: 6.17.0
@@ -29298,6 +29295,8 @@ snapshots:
       b4a: 1.6.7
 
   text-hex@1.0.0: {}
+
+  third-party-web@0.26.5: {}
 
   thread-loader@3.0.4(webpack@5.94.0):
     dependencies:

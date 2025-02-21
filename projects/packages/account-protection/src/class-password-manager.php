@@ -79,8 +79,8 @@ class Password_Manager {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification
-		$password = sanitize_text_field( wp_unslash( $_POST['pass1'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$password = wp_unslash( $_POST['pass1'] );
 		$error    = $this->validation_service->get_first_validation_error( $password );
 		if ( ! empty( $error ) ) {
 			$errors->add( 'password_error', $error );

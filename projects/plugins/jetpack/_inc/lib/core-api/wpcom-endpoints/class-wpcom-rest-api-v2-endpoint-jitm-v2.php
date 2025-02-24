@@ -15,7 +15,7 @@
 use Automattic\Jetpack\Connection\REST_Connector;
 
 /**
- * Class WPCOM_REST_API_V2_Endpoint_JITM_V2ssssss
+ * Class WPCOM_REST_API_V2_Endpoint_JITM_V2
  */
 class WPCOM_REST_API_V2_Endpoint_JITM_V2 extends WP_REST_Controller {
 

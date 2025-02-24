@@ -104,7 +104,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		$schema = parent::get_item_schema();
 
 		$schema['properties']['uid'] = array(
-			'description' => __( 'The UID... Updated description.', 'jetpack-forms' ),
+			'description' => __( 'Unique identifier for the form response.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -114,7 +114,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['author_name'] = array(
-			'description' => __( 'The author of the response.', 'jetpack-forms' ),
+			'description' => __( 'The name of the person who submitted the form.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -124,7 +124,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['author_email'] = array(
-			'description' => __( 'The email of the response\'s author.', 'jetpack-forms' ),
+			'description' => __( 'The email address of the person who submitted the form.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -134,7 +134,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['author_url'] = array(
-			'description' => __( 'The URL of the response\'s author.', 'jetpack-forms' ),
+			'description' => __( 'The website URL of the person who submitted the form.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -144,7 +144,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['author_avatar'] = array(
-			'description' => __( 'The avatar of the response\'s author.', 'jetpack-forms' ),
+			'description' => __( 'The URL of the avatar image for the person who submitted the form.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -154,7 +154,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['email_marketing_consent'] = array(
-			'description' => __( 'What to add here...?', 'jetpack-forms' ),
+			'description' => __( 'Whether the person consented to email marketing when submitting the form.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -164,7 +164,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['ip'] = array(
-			'description' => __( 'The IP of the response\'s author.', 'jetpack-forms' ),
+			'description' => __( 'The IP address from which the form was submitted.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -174,7 +174,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['entry_title'] = array(
-			'description' => __( 'The title of.....', 'jetpack-forms' ),
+			'description' => __( 'The title of the page or post where the form was submitted.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -184,7 +184,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['entry_permalink'] = array(
-			'description' => __( 'The permalink of....', 'jetpack-forms' ),
+			'description' => __( 'The URL of the page or post where the form was submitted.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -194,7 +194,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['subject'] = array(
-			'description' => __( 'The subject of....', 'jetpack-forms' ),
+			'description' => __( 'The subject line of the form submission.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
@@ -204,7 +204,7 @@ class Contact_Form_Endpoint extends \WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['fields'] = array(
-			'description' => __( 'The fields of....', 'jetpack-forms' ),
+			'description' => __( 'The custom form fields and their submitted values.', 'jetpack-forms' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit', 'embed' ),
 			'arg_options' => array(
